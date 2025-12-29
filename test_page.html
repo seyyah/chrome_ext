@@ -42,6 +42,11 @@
     <br><br>
 
     <button id="sendBtn">Extension'a "Hello" Mesajı Gönder</button>
+    <br><br>
+
+    <label for="customData">Gönderilecek Veri:</label>
+    <input type="text" id="customData" placeholder="Mesajınızı yazın..." style="width: 250px;">
+    <button id="openWinBtn">Veriyi Gönder ve Pencere Aç</button>
 
     <div id="status"></div>
 
@@ -69,6 +74,40 @@
                         } else {
                             console.log("Yanıt:", response);
                             statusDiv.innerText = "Extension yanıtı: " + JSON.stringify(response);
+                            statusDiv.style.color = "green";
+                        }
+                    }
+                );
+            } else {
+                statusDiv.innerText = "chrome.runtime API bulunamadı. Chrome tarayıcısında mısınız?";
+                statusDiv.style.color = "red";
+            }
+        });
+
+        document.getElementById('openWinBtn').addEventListener('click', function () {
+            const extensionId = document.getElementById('extId').value.trim();
+            const data = document.getElementById('customData').value;
+            const statusDiv = document.getElementById('status');
+
+            if (!extensionId) {
+                statusDiv.innerText = "Lütfen önce Extension ID giriniz.";
+                statusDiv.style.color = "red";
+                return;
+            }
+
+            statusDiv.innerText = "İstek gönderiliyor...";
+            statusDiv.style.color = "blue";
+
+            if (chrome && chrome.runtime && chrome.runtime.sendMessage) {
+                chrome.runtime.sendMessage(extensionId, { action: "open_popup_with_data", text: data },
+                    function (response) {
+                        if (chrome.runtime.lastError) {
+                            console.error(chrome.runtime.lastError);
+                            statusDiv.innerText = "Hata: " + chrome.runtime.lastError.message;
+                            statusDiv.style.color = "red";
+                        } else {
+                            console.log("Yanıt:", response);
+                            statusDiv.innerText = "Başarılı! Extension yanıtı: " + JSON.stringify(response);
                             statusDiv.style.color = "green";
                         }
                     }
