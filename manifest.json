@@ -3,12 +3,19 @@
   "name": "Hello World Extension",
   "version": "1.0",
   "description": "A minimalist Hello World extension.",
+  "icons": {
+    "16": "icon16.png",
+    "32": "icon32.png",
+    "48": "icon48.png",
+    "128": "icon128.png"
+  },
   "action": {
-    "default_popup": "popup.html"
+    "default_title": "Chatbot Asistanı Aç"
   },
   "permissions": [
     "storage",
-    "sidePanel"
+    "sidePanel",
+    "tabs"
   ],
   "side_panel": {
     "default_path": "sidepanel.html"

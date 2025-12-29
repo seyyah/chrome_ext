@@ -112,8 +112,10 @@
 <body>
     <div class="header">
         <h1>Chatbot Asistan</h1>
-        <button id="clearBtn" title="Sohbeti Temizle"
-            style="background:none; border:none; cursor:pointer; font-size:16px;">🗑️</button>
+        <div style="display: flex; gap: 10px;">
+            <button id="searchBtn" title="Son mesajı Google'da ara" style="background:none; border:none; cursor:pointer; font-size:16px;">🔍</button>
+            <button id="clearBtn" title="Sohbeti Temizle" style="background:none; border:none; cursor:pointer; font-size:16px;">🗑️</button>
+        </div>
     </div>
     <ul id="messageList">
         <!-- Mesajlar buraya eklenecek -->

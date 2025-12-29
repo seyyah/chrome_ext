@@ -88,3 +88,9 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
 });
 
 console.log("Hello World Extension Background Service Worker Yüklendi.");
+
+// Toolbar ikonuna tıklanınca Side Panel açılsın
+if (chrome.sidePanel && chrome.sidePanel.setPanelBehavior) {
+    chrome.sidePanel.setPanelBehavior({ openPanelOnActionClick: true })
+        .catch((error) => console.error("Panel davranışı ayarlanamadı:", error));
+}

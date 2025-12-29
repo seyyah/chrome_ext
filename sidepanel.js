@@ -81,13 +81,37 @@ document.addEventListener('DOMContentLoaded', function () {
     // Temizle (Çöp Kutusu) butonu dinleyicisi
     const clearBtn = document.getElementById('clearBtn');
     if (clearBtn) {
-        clearBtn.onclick = function () {
-            if (confirm("Sohbet geçmişi silinsin mi?")) {
-                chrome.storage.local.remove('messages', function () {
+        clearBtn.onclick = function() {
+            if(confirm("Sohbet geçmişi silinsin mi?")) {
+                chrome.storage.local.remove('messages', function() {
                     const list = document.getElementById('messageList');
                     list.innerHTML = '<div class="empty-state">Henüz mesaj yok.</div>';
                 });
             }
+        }
+    }
+
+    // Google Arama butonu dinleyicisi
+    const searchBtn = document.getElementById('searchBtn');
+    if (searchBtn) {
+        searchBtn.onclick = function() {
+            chrome.storage.local.get(['messages'], function(result) {
+                const messages = result.messages || [];
+                if (messages.length > 0) {
+                    // En son mesajı al (Siz: ve timestamp kısımlarını temizleyebiliriz ama şimdilik ham metin)
+                    const lastMsg = messages[messages.length - 1].text;
+                    
+                    // "Siz: " ön ekini temizle
+                    const query = lastMsg.replace(/^Siz:\s*/, '');
+                    
+                    if(query) {
+                        const url = 'https://www.google.com/search?q=' + encodeURIComponent(query);
+                        chrome.tabs.create({ url: url });
+                    }
+                } else {
+                    alert("Aranacak mesaj bulunamadı.");
+                }
+            });
         }
     }
 });
