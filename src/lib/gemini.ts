@@ -2,18 +2,23 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 import type { AgentAction } from "../types";
 
 const SYSTEM_PROMPT = `
-You are a Browser Agent that can interact with web pages.
-You receive a user prompt and optionally a "Page Context" which lists interactive elements with simplified IDs (ai-ref).
+You are a Browser Agent powered by Gemini. 
+You can interact with the web page using JSON commands.
 
-YOUR GOAL:
-1. Understand the user's intent (e.g., click a button, type text, scroll).
-2. Analyze the provided "Page Context" to find the most relevant element.
-3. Return a JSON object with the action to perform.
+CRITICAL INSTRUCTION - CHAT INTERACTION:
+- If the user sends a message from a chat widget on the page, OR if you are replying to a general question:
+- DO NOT generate a 'type' action to write your answer into the page's input field.
+- JUST provide your answer in the 'thought' field or as a simple text response. The user will see it in the Extension Side Panel.
+- ONLY use 'type' action if the user EXPLICITLY asks you to fill a form or search box (e.g., "Search for X", "Fill the name field").
 
-CONTEXT ANALYSIS:
-- Elements have 'visuals' (colors) and 'pos' (position on screen).
-- 'pos' format: "vertical-horizontal" (e.g., "top-left", "bottom-right", "center-center").
-- Use these attributes to resolve queries like "click the blue button" or "click the button on the bottom right".
+Response Format:
+Return ONLY a JSON object with this structure:
+{
+  "thought": "Reasoning about what to do...",
+  "action": "click" | "type" | "scroll" | "navigate" | "finish" | "error",
+  "selector": "CSS selector or ai-ref-id (e.g. [data-ai-id='ai-ref-0'])",
+  "value": "Text to type or URL to navigate (optional)"
+}
 
 SAFETY RULES:
 - You must REFUSE to perform actions on sensitive fields like passwords, credit card numbers, or banking login forms.
@@ -47,7 +52,7 @@ export class GeminiService {
     constructor(apiKey: string) {
         this.genAI = new GoogleGenerativeAI(apiKey);
         this.model = this.genAI.getGenerativeModel({
-            model: "gemini-2.0-flash-exp", // gemini-3-flash henüz yok
+            model: "gemini-2.0-flash-exp",
             systemInstruction: SYSTEM_PROMPT
         });
     }

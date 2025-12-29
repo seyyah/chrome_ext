@@ -10,9 +10,26 @@ export function useChat() {
 
     // Load history and API key on mount
     useEffect(() => {
-        chrome.storage.local.get(['chatHistory', 'geminiApiKey'], (result) => {
+        chrome.storage.local.get(['chatHistory', 'geminiApiKey', 'pendingMessage'], (result) => {
             if (result.chatHistory) setMessages(result.chatHistory as ChatMessage[]);
             if (result.geminiApiKey) setApiKey(result.geminiApiKey as string);
+
+            // Check for pending message (Race condition fix)
+            if (result.pendingMessage) {
+                const pendingMsg: ChatMessage = {
+                    id: Date.now().toString(),
+                    role: 'user',
+                    content: result.pendingMessage as string,
+                    timestamp: Date.now()
+                };
+                // Avoid duplicates if it was also saved in history
+                setMessages(prev => {
+                    // Simple duplicate check by content + recent time could be better but this suffices for now
+                    return [...prev, pendingMsg];
+                });
+                // Clear it
+                chrome.storage.local.remove('pendingMessage');
+            }
         });
     }, []);
 
@@ -32,6 +49,29 @@ export function useChat() {
         setMessages([]);
         chrome.storage.local.remove('chatHistory');
     };
+
+    // Listen for incoming messages from Content Script (Page Chat)
+    useEffect(() => {
+        const handleMessage = (message: any) => {
+            if (message.action === "incoming_message_from_page" || message.action === "relayed_message_from_page") {
+                const userMsg: ChatMessage = {
+                    id: Date.now().toString(),
+                    role: 'user',
+                    content: message.text,
+                    timestamp: Date.now()
+                };
+                setMessages(prev => [...prev, userMsg]);
+
+                // Opsiyonel: Agent'ın buna cevap vermesini istiyorsak sendMessage(message.text) çağrılabilir.
+                // Şimdilik sadece "görünsün" dendiği için listeye ekliyoruz.
+                // Eğer otomatik cevap istenirse:
+                // sendMessage(message.text); // Bu recursion yaratabilir, dikkat.
+            }
+        };
+
+        chrome.runtime.onMessage.addListener(handleMessage);
+        return () => chrome.runtime.onMessage.removeListener(handleMessage);
+    }, []);
 
     const sendMessage = async (text: string) => {
         if (!apiKey) {

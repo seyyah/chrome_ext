@@ -344,13 +344,20 @@
             appendMessage(text, 'user');
             userInput.value = '';
 
-            // 2. Extension'a gönder
-            if (chrome && chrome.runtime) {
-                chrome.runtime.sendMessage(extId, { action: "open_popup_with_data", text: text },
-                    function (response) {
-                        if (chrome.runtime.lastError) console.error(chrome.runtime.lastError);
-                    }
-                );
+            // 2. Extension'a gönder (Yedekli Yöntem)
+
+            // Yöntem A: PostMessage (Content Script Bridge)
+            window.postMessage({ type: "FROM_PAGE", text: text }, "*");
+
+            // Yöntem B: Direct Extension Messaging (Legacy & Robust for Panel Opening)
+            if (chrome && chrome.runtime && extId) {
+                try {
+                    chrome.runtime.sendMessage(extId, { action: "open_popup_with_data", text: text },
+                        function (response) {
+                            if (chrome.runtime.lastError) console.log("Legacy msg error (expected if ID wrong):", chrome.runtime.lastError);
+                        }
+                    );
+                } catch (e) { console.log("Extension ID messaging failed", e); }
             }
         }
 

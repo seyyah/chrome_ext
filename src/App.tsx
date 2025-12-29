@@ -62,16 +62,16 @@ function App() {
   }
 
   return (
-    <div className="flex flex-col h-screen bg-gray-50">
+    <div className="flex flex-col fixed inset-0 w-full bg-gray-50 overflow-hidden">
       {/* Header */}
-      <div className="bg-white p-4 shadow-sm flex justify-between items-center sticky top-0 z-10">
+      <div className="bg-white p-4 shadow-sm flex-none flex justify-between items-center z-10">
         <h1 className="font-bold text-gray-800 flex items-center gap-2">
           <Bot className="text-blue-600" />
           Gemini Agent
         </h1>
         <button
           onClick={clearChat}
-          className="p-2 text-gray-500 hover:text-red-500 rounded-full hover:bg-gray-100"
+          className="p-2 text-gray-500 hover:text-red-500 rounded-full hover:bg-gray-100 flex-shrink-0"
           title="Clear Chat"
         >
           <Trash2 size={20} />
@@ -149,7 +149,7 @@ function App() {
       </div>
 
       {/* Input */}
-      <div className="p-4 bg-white border-t">
+      <div className="p-4 bg-white border-t flex-none">
         <div className="flex gap-2">
           <input
             ref={inputRef}
