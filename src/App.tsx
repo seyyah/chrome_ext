@@ -105,7 +105,21 @@ function App() {
                 ? 'bg-blue-600 text-white rounded-tr-none'
                 : 'bg-white text-gray-800 rounded-tl-none border border-gray-100'}
             `}>
-              {msg.content}
+              {typeof msg.content === 'string' ? (
+                msg.content
+              ) : (
+                <div className="flex flex-col gap-2">
+                  <div className="font-semibold text-gray-700 italic border-l-2 border-green-500 pl-2">
+                    "{msg.content.thought}"
+                  </div>
+                  {msg.content.action !== 'finish' && (
+                    <div className="text-xs bg-gray-100 p-2 rounded flex items-center gap-2">
+                      <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
+                      <span>Executing: <b>{msg.content.action}</b> on <code>{msg.content.selector || 'page'}</code></span>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           </div>
         ))}
