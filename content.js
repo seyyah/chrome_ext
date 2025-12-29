@@ -13,6 +13,10 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
             // Mesajı input alanına yaz
             inputField.value = request.text;
 
+            // Sayfanın algılaması için event tetikle
+            inputField.dispatchEvent(new Event('input', { bubbles: true }));
+            inputField.dispatchEvent(new Event('change', { bubbles: true }));
+
             // Görsel efekt (Yanıp sönme veya border)
             inputField.style.backgroundColor = "#e8f0fe";
             setTimeout(() => {

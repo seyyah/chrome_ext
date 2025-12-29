@@ -39,12 +39,18 @@ function loadMessages() {
             });
         }
     });
+}
+
+
+// İlk yükleme ve Olay Dinleyicileri
+document.addEventListener('DOMContentLoaded', function () {
+    loadMessages();
+
     // Gönder butonu olay dinleyicisi
     const replyBtn = document.getElementById('replyBtn');
     const replyInput = document.getElementById('replyInput');
 
     if (replyBtn) {
-        // Önceki listener'ı temizlemek için klonlama yöntemi veya sadece onclick atama
         replyBtn.onclick = async function () {
             const text = replyInput.value.trim();
             if (!text) return;
@@ -63,7 +69,7 @@ function loadMessages() {
                 chrome.storage.local.set({ messages: messages });
             });
 
-            // 3. Mesajı Background'a ilet (O da sayfaya iletecek)
+            // 3. Mesajı Background'a ilet
             chrome.runtime.sendMessage({ action: "send_reply_to_tab", text: text }, function (response) {
                 console.log("Mesaj iletim sonucu:", response);
             });
@@ -71,10 +77,20 @@ function loadMessages() {
             replyInput.value = '';
         };
     }
-}
 
-// İlk yükleme
-document.addEventListener('DOMContentLoaded', loadMessages);
+    // Temizle (Çöp Kutusu) butonu dinleyicisi
+    const clearBtn = document.getElementById('clearBtn');
+    if (clearBtn) {
+        clearBtn.onclick = function () {
+            if (confirm("Sohbet geçmişi silinsin mi?")) {
+                chrome.storage.local.remove('messages', function () {
+                    const list = document.getElementById('messageList');
+                    list.innerHTML = '<div class="empty-state">Henüz mesaj yok.</div>';
+                });
+            }
+        }
+    }
+});
 
 // Storage değişimlerini dinle (yeni mesaj gelince anlık güncelleme için)
 chrome.storage.onChanged.addListener(function (changes, namespace) {
