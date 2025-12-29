@@ -9,22 +9,60 @@ chrome.runtime.onMessageExternal.addListener(
         }
 
         if (request.action === "open_popup_with_data") {
-            console.log("Pencere açma isteği geldi. Veri:", request.text);
+            const messageText = request.text;
+            console.log("Side Panel isteği geldi. Veri:", messageText);
 
-            // 1. Veriyi kaydet
-            chrome.storage.local.set({ userText: request.text }, function () {
-                console.log("Veri kaydedildi.");
+            // 1. Tab ID'yi al (Mesajı gönderen tab)
+            const tabId = sender.tab ? sender.tab.id : null;
 
-                // 2. Pencereyi aç
-                chrome.windows.create({
-                    url: chrome.runtime.getURL("popup.html"),
-                    type: "popup",
-                    width: 300,
-                    height: 200
+            if (!tabId) {
+                console.error("Tab ID bulunamadı, side panel açılamıyor.");
+                return;
+            }
+
+            // 2. Mesajı listeye ekle
+            chrome.storage.local.get(['messages'], function (result) {
+                const messages = result.messages || [];
+                messages.push({
+                    text: messageText,
+                    time: new Date().toLocaleTimeString(),
+                    tabId: tabId
+                });
+
+                chrome.storage.local.set({ messages: messages }, function () {
+                    console.log("Mesaj listeye eklendi.");
                 });
             });
 
-            sendResponse({ result: "Pencere açılıyor..." });
+            // 3. Side Paneli Aç
+            // Özel not: Side Panel'in açılması için kullanıcının extension'a izin vermiş olması gerekebilir.
+            // setOptions({enabled: true}) yapmak panelin görünür olmasını sağlar.
+            chrome.sidePanel.setOptions({
+                tabId: tabId,
+                path: 'sidepanel.html',
+                enabled: true
+            });
+
+            // Side panel açma komutu (User gesture kısıtlaması olabilir, ancak deneyelim)
+            // Chrome 116+ sonrası sidePanel.open destekleniyor.
+            if (chrome.sidePanel.open) {
+                chrome.sidePanel.open({ tabId: tabId })
+                    .catch(err => console.error("Side panel açılamadı (gesture gerekli olabilir):", err));
+            }
+
+            sendResponse({ result: "Mesaj panele eklendi." });
+        }
+
+        if (request.action === "close_side_panel") {
+            const tabId = sender.tab ? sender.tab.id : null;
+            if (tabId) {
+                // Paneli kapatmak için enabled: false yapıyoruz
+                chrome.sidePanel.setOptions({
+                    tabId: tabId,
+                    enabled: false
+                });
+                sendResponse({ result: "Panel gizlendi/kapatıldı." });
+            }
         }
 
         // Asenkron işlemler (storage, windows.create) olduğu için true dönmek önemli!

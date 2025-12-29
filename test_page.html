@@ -44,9 +44,12 @@
     <button id="sendBtn">Extension'a "Hello" Mesajı Gönder</button>
     <br><br>
 
-    <label for="customData">Gönderilecek Veri:</label>
+    <label for="customData">Mesaj:</label>
     <input type="text" id="customData" placeholder="Mesajınızı yazın..." style="width: 250px;">
-    <button id="openWinBtn">Veriyi Gönder ve Pencere Aç</button>
+    <button id="openSidePanelBtn">Panele Mesaj Gönder (Aç)</button>
+
+    <br><br>
+    <button id="closeSidePanelBtn" style="background-color: #fdd;">Paneli Gizle</button>
 
     <div id="status"></div>
 
@@ -84,7 +87,7 @@
             }
         });
 
-        document.getElementById('openWinBtn').addEventListener('click', function () {
+        document.getElementById('openSidePanelBtn').addEventListener('click', function () {
             const extensionId = document.getElementById('extId').value.trim();
             const data = document.getElementById('customData').value;
             const statusDiv = document.getElementById('status');
@@ -115,6 +118,17 @@
             } else {
                 statusDiv.innerText = "chrome.runtime API bulunamadı. Chrome tarayıcısında mısınız?";
                 statusDiv.style.color = "red";
+            }
+        });
+
+        document.getElementById('closeSidePanelBtn').addEventListener('click', function () {
+            const extensionId = document.getElementById('extId').value.trim();
+            if (!extensionId) return;
+
+            if (chrome && chrome.runtime && chrome.runtime.sendMessage) {
+                chrome.runtime.sendMessage(extensionId, { action: "close_side_panel" }, function (response) {
+                    console.log("Kapatma yanıtı:", response);
+                });
             }
         });
     </script>
