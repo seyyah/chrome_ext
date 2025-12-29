@@ -54,38 +54,7 @@
     <div id="status"></div>
 
     <script>
-        document.getElementById('sendBtn').addEventListener('click', function () {
-            const extensionId = document.getElementById('extId').value.trim();
-            const statusDiv = document.getElementById('status');
-
-            if (!extensionId) {
-                statusDiv.innerText = "Lütfen önce Extension ID giriniz.";
-                statusDiv.style.color = "red";
-                return;
-            }
-
-            statusDiv.innerText = "Mesaj gönderiliyor...";
-            statusDiv.style.color = "blue";
-
-            if (chrome && chrome.runtime && chrome.runtime.sendMessage) {
-                chrome.runtime.sendMessage(extensionId, { action: "hello" },
-                    function (response) {
-                        if (chrome.runtime.lastError) {
-                            console.error(chrome.runtime.lastError);
-                            statusDiv.innerText = "Hata: " + chrome.runtime.lastError.message;
-                            statusDiv.style.color = "red";
-                        } else {
-                            console.log("Yanıt:", response);
-                            statusDiv.innerText = "Extension yanıtı: " + JSON.stringify(response);
-                            statusDiv.style.color = "green";
-                        }
-                    }
-                );
-            } else {
-                statusDiv.innerText = "chrome.runtime API bulunamadı. Chrome tarayıcısında mısınız?";
-                statusDiv.style.color = "red";
-            }
-        });
+        // Hello butonuna gerek kalmadı ama kodda bozulma olmasın diye event listener'ı kaldırmıyoruz, HTML'den butonu sildik.
 
         document.getElementById('openSidePanelBtn').addEventListener('click', function () {
             const extensionId = document.getElementById('extId').value.trim();

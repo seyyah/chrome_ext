@@ -39,6 +39,38 @@ function loadMessages() {
             });
         }
     });
+    // Gönder butonu olay dinleyicisi
+    const replyBtn = document.getElementById('replyBtn');
+    const replyInput = document.getElementById('replyInput');
+
+    if (replyBtn) {
+        // Önceki listener'ı temizlemek için klonlama yöntemi veya sadece onclick atama
+        replyBtn.onclick = async function () {
+            const text = replyInput.value.trim();
+            if (!text) return;
+
+            // 1. UI'ya ekle
+            const fullText = "Siz: " + text;
+            addMessageToUI(fullText);
+
+            // 2. Storage'a kaydet
+            chrome.storage.local.get(['messages'], function (result) {
+                const messages = result.messages || [];
+                messages.push({
+                    text: fullText,
+                    time: new Date().toLocaleTimeString()
+                });
+                chrome.storage.local.set({ messages: messages });
+            });
+
+            // 3. Mesajı Background'a ilet (O da sayfaya iletecek)
+            chrome.runtime.sendMessage({ action: "send_reply_to_tab", text: text }, function (response) {
+                console.log("Mesaj iletim sonucu:", response);
+            });
+
+            replyInput.value = '';
+        };
+    }
 }
 
 // İlk yükleme
